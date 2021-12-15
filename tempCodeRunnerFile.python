@@ -1,0 +1,115 @@
+# import chess library for using chess moves,board etc 
+import chess
+import time
+
+# alpha beta function  
+ 
+def alphabeta(board, depth, alpha, beta, maximize): 
+    if board.is_checkmate(): 
+        return -40 if maximize else 40 
+    elif board.is_game_over(): 
+        return 0 
+ 
+    if depth == 0: 
+        return boardValue(board) 
+ 
+    if maximize: 
+        bestValue = float("-inf") 
+        for move in board.legal_moves: 
+            experimentBoard = board.copy() 
+            experimentBoard.push(move) 
+            value = alphabeta(experimentBoard, depth, alpha, beta, False) 
+            bestValue = max(bestValue, value) 
+            alpha = max(alpha, bestValue) 
+            if alpha >= beta: 
+                break 
+        return bestValue 
+    else: 
+        bestValue = float("inf") 
+        for move in board.legal_moves: 
+            experimentBoard = board.copy() 
+            experimentBoard.push(move) 
+            value = alphabeta(experimentBoard, depth - 1, alpha, beta, True) 
+            bestValue = min(bestValue, value) 
+            beta = min(beta, bestValue) 
+            if alpha >= beta: 
+                break 
+        return bestValue 
+ 
+    return 0 
+
+    # method for calculating points 
+# P --> for white (capital for white) 
+# p --> for black (lower for black) 
+def boardValue(board): 
+    boardString = board.fen().split()[0] 
+    pawnDiff = boardString.count("P") - boardString.count("p") 
+    rookDiff = boardString.count("R") - boardString.count("r") 
+    knightDiff = boardString.count("N") - boardString.count("n") 
+    bishopDiff = boardString.count("B") - boardString.count("b") 
+    queenDiff = boardString.count("Q") - boardString.count("q") 
+ 
+    return 1*pawnDiff + 3*bishopDiff + 3*knightDiff + 5*rookDiff + 9*queenDiff
+
+# main part  
+if __name__ == "__main__": 
+    gameBoard = chess.Board() 
+ 
+    while True:
+         
+ 
+        print(gameBoard) 
+        print(gameBoard.legal_moves) 
+        userMove = input("Enter the move you want to make: ") 
+        gameBoard.push_san(userMove) 
+        
+        start = time.time()
+ 
+        if gameBoard.is_checkmate(): 
+            print(gameBoard) 
+            print("User wins!") 
+            break 
+        elif gameBoard.is_game_over(): 
+            print(gameBoard) 
+            print("Tie game") 
+            break 
+ 
+        minValue = float("inf") 
+        minMove = None 
+        for move in gameBoard.legal_moves: 
+            experimentBoard = gameBoard.copy() 
+            experimentBoard.push(move)
+            
+            
+            
+            value = alphabeta(experimentBoard, 3, float("-inf"), float("inf"), False) 
+ 
+            if value < minValue: 
+                minValue = value 
+                minMove = move 
+         
+        gameBoard.push(minMove) 
+        
+        end = time.time() 
+        total_time = end-start
+        
+        if gameBoard.is_checkmate(): 
+            print(gameBoard) 
+            print("Computer wins") 
+            break 
+        elif gameBoard.is_game_over(): 
+            print(gameBoard) 
+            print("Tie game") 
+            break
+        
+        
+        # run your code 
+        
+        print()
+        print("Time Required to Run:",total_time,'seconds')
+        print()
+        #Depth 1 = 0.05060720443725586 seconds
+        #Depth 2 = 1.0904638767242432 seconds
+        #Depth 3 = 28.24622941017151 seconds
+        #Depth 4 = 28.24622941017151 seconds
+        
